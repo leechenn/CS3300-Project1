@@ -66,15 +66,15 @@ var data = [
       .data(tickValues).enter()
     .append("path")
       .attr("class", "tickPath")
-      .attr("d", function(d) { 
+      .attr("d", function(d) {
         var tickArray = [];
         for (i=0;i<numBars;i++) tickArray.push({count : d});
-        return area(tickArray); 
+        return area(tickArray);
       })
       .style("fill", function(d) { return color(d); })
       .style("stroke", function(d,i) { return (i === 0) ? "none" : "#5e5e5e"; })
       .style("stroke-width", function(d,i) { return (i === 0) ? "1px" : ".5px"; });
-  
+
    var lines = svg.selectAll("line")
        .data(data)
        .enter().append("g")
@@ -90,7 +90,7 @@ var data = [
     .attr("class", "names")
     .attr("x", function(d, i) { return (barHeight + 15) * Math.sin((i * 2 * Math.PI / numBars)); })
     .attr("y", function(d, i) { return -(barHeight + 15) * Math.cos((i * 2 * Math.PI / numBars)); })
-    .attr("text-anchor", function(d,i) { 
+    .attr("text-anchor", function(d,i) {
     if (i===0 || i===numBars/2) {
         return "middle";
       }else if (i <= numBars/2) {
@@ -100,7 +100,7 @@ var data = [
       }
     })
     .style("font-weight","bold")
-    .text(function(d) { return d.sports; }); 
+    .text(function(d) { return d.sports; });
 
   layer = svg.selectAll(".layer")
     .data([data]).enter()

@@ -37,8 +37,8 @@ ChenLi -->
     <div>
     <p>Winter Olympic Games For US (Medals--Time (black:total, pink:women, blue:men) )</p>
     </div>
-    <svg id="svg3" height="500" width="800"></svg>
-    <svg id="svg4" height="800" width="1200"></svg>
+    <!-- <svg id="svg3" height="500" width="800"></svg> -->
+    <svg id="svg4" height="1000" width="1000"></svg>
     <script id="script1">
     var rawData, nestedData;
     var yearData;
@@ -56,6 +56,7 @@ ChenLi -->
     var width2 = svg2.attr("width");
     var projection = d3.geoEquirectangular().center([0, 0]);
     var pathGenerator = d3.geoPath().projection(projection);
+    var sectorScale = d3.scaleOrdinal(d3.schemeCategory20);
     parseTime = d3.timeParse("%Y");
     function parseLine(line){
       return {
@@ -75,13 +76,16 @@ ChenLi -->
       };
     };
     d3.json("/datasets/world-50m.json", function (error, data) {
-
+      console.log("worldmap");
       countries = topojson.feature(data, data.objects.countries);
+      projection.fitExtent([[0,svg4.attr("height")/2], [svg4.attr("width"), svg4.attr("height")]], countries);
+
       // var interestingPoints = [[0,0], [-76, 42]];
        showMap();
     });
 
     d3.csv("/datasets/newdata.csv",parseLine,function(error,data){
+       console.log("newdata load");
       rawData = data;
       nestedData = d3.nest()
       .key(function(d){return d.Year})
@@ -104,17 +108,19 @@ ChenLi -->
         });
         result.Men = men;
         result.Women = women;
+        result.City = year.values[0]["City"];
         result.Location = year.values[0]["Location"];
         return result;
       });
       yearData.sort(function(objA,objB){
         return Number(objA["Year"])-Number(objB["Year"]);
       });
-      console.log(yearData);
+
       yearData.forEach(function(d){
-        var array=[d["Location"][0],d["Location"][1],d["Number"]];
+        var array=[d["Location"][0],d["Location"][1],d["Number"],d["City"],d["Year"]];
         hostPoints.push(array);
       });
+
       genderScale = d3.scaleOrdinal()
       .domain(["Men","Women"])
       .range(["#5C9FEC","#EB7BA1"]);
@@ -125,14 +131,13 @@ ChenLi -->
       numberScale2 = d3.scaleLinear().domain([0,25]).range([width2/2,width2-30]);
       numberScaleR = d3.scaleLinear().domain([0,120]).range([width/2,30]);
       numberScaleR2 = d3.scaleLinear().domain([0,25]).range([width2/2,30]);
-      numberScaleForLine = d3.scaleLinear().domain([0,numberExtent[1]]).range([450,50]);
-      timeScaleForLine = d3.scaleTime().domain(timeExtent).range([50,750]);
+      numberScaleForLine = d3.scaleLinear().domain([0,numberExtent[1]]).range([400,50]);
+      timeScaleForLine = d3.scaleTime().domain(timeExtent).range([40,960]);
       var timeAxisForLine = d3.axisBottom(timeScaleForLine);
       timeAxisForLine.tickValues(timeArray);
       showdata(yearData,svg,numberScale);
       showdata(yearData,svg2,numberScale2);
       var timeAxis = d3.axisLeft(timeScale);
-
       timeAxis.tickValues(timeArray).tickSize(0);
       svg.append("g")
       .attr("class","axisy")
@@ -155,13 +160,14 @@ ChenLi -->
       .call(numberAxis);
       svg2.append("g")
       .call(numberAxisR2);
-      svg3.append("g")
+      numberAxisForLine.tickSize(2);
+      svg4.append("g")
       .call(numberAxisForLine)
-      .attr("transform","translate(50,0)");
-      svg3.append("g")
+      .attr("transform","translate(20,0)");
+      svg4.append("g")
       .call(timeAxisForLine)
       .attr("class","axisy")
-      .attr("transform","translate(0,450)");
+      .attr("transform","translate(0,400)");
       showLine(yearData,"men");
       showLine(yearData,"women");
       showLine(yearData,"both");
@@ -241,6 +247,7 @@ ChenLi -->
        });
      }
      function showLine(data,gender){
+        console.log("showLine");
        var pathGenerator = d3.line()
        .x(function(d){return timeScaleForLine(d.Year); })
        .y(function(d){
@@ -256,34 +263,103 @@ ChenLi -->
        });
        var pathData = pathGenerator(data);
        if(gender=="men"){
-       svg3.append("path")
+       svg4.append("path")
        .attr("d",pathData)
        .attr('stroke','blue')
-       .attr('stroke-width','5px')
-       .attr('opacity','0.5')
+       .attr('stroke-width','1px')
        .attr('fill','none');
      }
      if(gender=="women"){
-     svg3.append("path")
+     svg4.append("path")
      .attr("d",pathData)
      .attr('stroke','pink')
-     .attr('stroke-width','5px')
-     .attr('opacity','0.5')
+     .attr('stroke-width','1px')
      .attr('fill','none');
    }
    if(gender=="both"){
-   svg3.append("path")
+   svg4.append("path")
    .attr("d",pathData)
    .attr('stroke','black')
-   .attr('stroke-width','5px')
-   .attr('opacity','0.5')
+   .attr('stroke-width','1px')
    .attr('fill','none');
+   svg4.selectAll(".bar-total")
+    .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return timeScaleForLine(d.Year)-5; })
+      .attr("y", function(d) { return numberScaleForLine(d.Number); })
+      .style("fill","black")
+      .style("fill-opacity",0.5)
+      .attr("width", 10)
+      .attr("height", function(d) { return 400 - numberScaleForLine(d.Number)
+      });
+    svg4.selectAll(".bar-men")
+     .data(data)
+     .enter().append("rect")
+       .attr("class", "bar-men")
+       .attr("x", function(d) { return timeScaleForLine(d.Year)-15; })
+       .attr("y", function(d) { return numberScaleForLine(d.Men); })
+       .style("fill","blue")
+       .style("fill-opacity",0.5)
+       .attr("width", 10)
+       .attr("height", function(d) { return 400 - numberScaleForLine(d.Men)
+       });
+     svg4.selectAll(".bar-women")
+      .data(data)
+      .enter().append("rect")
+        .attr("class", ".bar-women")
+        .attr("x", function(d) { return timeScaleForLine(d.Year)+5; })
+        .attr("y", function(d) { return numberScaleForLine(d.Women); })
+        .style("fill","pink")
+        .style("fill-opacity",0.5)
+        .attr("width", 10)
+        .attr("height", function(d) { return 400 - numberScaleForLine(d.Women)
+        });
+      svg4.selectAll(".bar-text")
+       .data(data)
+       .enter().append("text")
+         .attr("class", "bar-text")
+         .attr("x", function(d) { return timeScaleForLine(d.Year)-20; })
+         .attr("y", function(d) { return numberScaleForLine(d.Number)-30;})
+         .attr("fill",function(d,i){return sectorScale(i)})
+         .text(function(d){return d.Men+"/"+d.Number+"/"+d.Women});
+      svg4.append("text")
+      .attr("x",30)
+      .attr("y",30)
+      .attr("font-size",20)
+      .text("Men/Total/Women")
+
  }
      }
 
      function showMap() {
+       console.log("showMap");
+       hostPoints.forEach(function(d,i){
+         var x=timeScaleForLine(d[4]);
+         var circlex=projection([d[1],d[0]])[0];
+         var circley=projection([d[1],d[0]])[1];
+         var path=[[x,420],[x,460],[circlex,circley]];
+         var connectionGenerator = d3.line();
+         var pathString = connectionGenerator(path);
+         svg4.append("path")
+         .attr("d",pathString)
+         .attr("fill","none")
+         .attr("stroke",sectorScale(i));
+         var number;
+         if(i%2==0){
+           number=10;
+         }
+         else{
+           number=-10;
+         }
+         svg4.append("text")
+         .attr("x",x+3)
+         .attr("y",440+number)
+         .text(d[3])
+         .attr("font-size",8)
+         .attr("fill",sectorScale(i));
+       });
 
-        // projection.fitExtent([[0,0], [svg4.attr("width"), svg4.attr("height")]], countries);
         pathGenerator = d3.geoPath().projection(projection);
         var paths = svg4.selectAll("path.country")
         .data(countries.features);
@@ -292,15 +368,14 @@ ChenLi -->
         paths.attr("d", function (country) {
           return pathGenerator(country);
         })
-        .style("stroke","white")
-        .style("fill","grey");
+        .style("stroke","darkblue")
+        .style("fill","lightblue")
+        .style("opacity","0.5");
         var circles = svg4.selectAll("circle")
         .data(hostPoints);
         circles.exit().remove();
         circles = circles.enter().append("circle")
-        .attr("r", function (d) {
-          return d[2];
-        }).merge(circles);
+        .merge(circles);
         circles
         .attr("cx", function (d) {
           return projection([d[1],d[0]])[0];
@@ -308,8 +383,11 @@ ChenLi -->
         .attr("cy", function (d) {
           return projection([d[1],d[0]])[1];
         })
+        .attr("r", function (d) {
+          return 2;
+        })
         .attr("fill", "red")
-        .attr("opacity", "0.25");
+        .attr("opacity", "1");
 
       }
 
