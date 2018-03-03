@@ -38,7 +38,17 @@ ChenLi -->
     <p>Winter Olympic Games For US (Medals--Time (black:total, pink:women, blue:men) )</p>
     </div>
     <!-- <svg id="svg3" height="500" width="800"></svg> -->
-    <svg id="svg4" height="1000" width="1000"></svg>
+    <svg id="svg4" height="1000" width="1000">
+    <g class="legend" transform="translate(900,40)">
+    <rect width="25" height="10" style="fill: #1048C1;"></rect>
+    <text x="28" y="10">Men</text>
+  </g>
+  <g class="legend" transform="translate(900,20)">
+    <rect width="25" height="10" style="fill: #F7004A; "></rect>
+    <text x="28" y="10">Women</text>
+  </g>
+
+    </svg>
     <script id="script1">
     var rawData, nestedData;
     var yearData;
@@ -57,6 +67,7 @@ ChenLi -->
     var projection = d3.geoEquirectangular().center([0, 0]);
     var pathGenerator = d3.geoPath().projection(projection);
     var sectorScale = d3.scaleOrdinal(d3.schemeCategory20);
+    var yearArray=[];
     parseTime = d3.timeParse("%Y");
     function parseLine(line){
       return {
@@ -78,7 +89,7 @@ ChenLi -->
     d3.json("/datasets/world-50m.json", function (error, data) {
       console.log("worldmap");
       countries = topojson.feature(data, data.objects.countries);
-      projection.fitExtent([[0,svg4.attr("height")/2], [svg4.attr("width"), svg4.attr("height")]], countries);
+      projection.fitExtent([[0,svg4.attr("height")/2], [svg4.attr("width"), svg4.attr("height")-10]], countries);
 
       // var interestingPoints = [[0,0], [-76, 42]];
        showMap();
@@ -91,12 +102,13 @@ ChenLi -->
       .key(function(d){return d.Year})
       .entries(data);
       nestedData.forEach(function(d,i){
+        yearArray[i]=d.key;
         timeArray[i]=parseTime(d.key);
       });
       yearData = nestedData.map(function(year){
         var men=0;
         var women=0;
-        var result = {Year:parseTime(year.key)};
+        var result = {Year:year.key};
         result.Number = year.values.length;
         year.values.forEach(function(d){
           if(d.Gender=="Men"){
@@ -115,6 +127,9 @@ ChenLi -->
       yearData.sort(function(objA,objB){
         return Number(objA["Year"])-Number(objB["Year"]);
       });
+      yearArray.sort(function(objA,objB){
+        return Number(objA)-Number(objB);
+      });
 
       yearData.forEach(function(d){
         var array=[d["Location"][0],d["Location"][1],d["Number"],d["City"],d["Year"]];
@@ -132,9 +147,9 @@ ChenLi -->
       numberScaleR = d3.scaleLinear().domain([0,120]).range([width/2,30]);
       numberScaleR2 = d3.scaleLinear().domain([0,25]).range([width2/2,30]);
       numberScaleForLine = d3.scaleLinear().domain([0,numberExtent[1]]).range([400,50]);
-      timeScaleForLine = d3.scaleTime().domain(timeExtent).range([40,960]);
+      timeScaleForLine = d3.scaleBand().domain(yearArray).range([40,960]).paddingInner(0.2);
       var timeAxisForLine = d3.axisBottom(timeScaleForLine);
-      timeAxisForLine.tickValues(timeArray);
+      // timeAxisForLine.tickValues(timeArray);
       showdata(yearData,svg,numberScale);
       showdata(yearData,svg2,numberScale2);
       var timeAxis = d3.axisLeft(timeScale);
@@ -168,8 +183,8 @@ ChenLi -->
       .call(timeAxisForLine)
       .attr("class","axisy")
       .attr("transform","translate(0,400)");
-      showLine(yearData,"men");
-      showLine(yearData,"women");
+      // showLine(yearData,"men");
+      // showLine(yearData,"women");
       showLine(yearData,"both");
 
     });
@@ -249,7 +264,7 @@ ChenLi -->
      function showLine(data,gender){
         console.log("showLine");
        var pathGenerator = d3.line()
-       .x(function(d){return timeScaleForLine(d.Year); })
+       .x(function(d){return timeScaleForLine(d.Year)+timeScaleForLine.bandwidth()/2; })
        .y(function(d){
          if(gender=="men"){
          return numberScaleForLine(d.Men);
@@ -277,57 +292,57 @@ ChenLi -->
      .attr('fill','none');
    }
    if(gender=="both"){
-   svg4.append("path")
-   .attr("d",pathData)
-   .attr('stroke','black')
-   .attr('stroke-width','1px')
-   .attr('fill','none');
-   svg4.selectAll(".bar-total")
-    .data(data)
-    .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d) { return timeScaleForLine(d.Year)-5; })
-      .attr("y", function(d) { return numberScaleForLine(d.Number); })
-      .style("fill","black")
-      .style("fill-opacity",0.5)
-      .attr("width", 10)
-      .attr("height", function(d) { return 400 - numberScaleForLine(d.Number)
-      });
+   // svg4.append("path")
+   // .attr("d",pathData)
+   // .attr('stroke','black')
+   // .attr('stroke-width','1px')
+   // .attr('fill','none');
+   // svg4.selectAll(".bar-total")
+   //  .data(data)
+   //  .enter().append("rect")
+   //    .attr("class", "bar")
+   //    .attr("x", function(d) { return timeScaleForLine(d.Year)-5; })
+   //    .attr("y", function(d) { return numberScaleForLine(d.Number); })
+   //    .style("fill","black")
+   //    .style("fill-opacity",0.5)
+   //    .attr("width", 10)
+   //    .attr("height", function(d) { return 400 - numberScaleForLine(d.Number)
+   //    });
     svg4.selectAll(".bar-men")
      .data(data)
      .enter().append("rect")
        .attr("class", "bar-men")
-       .attr("x", function(d) { return timeScaleForLine(d.Year)-15; })
+       .attr("x", function(d) { return timeScaleForLine(d.Year); })
        .attr("y", function(d) { return numberScaleForLine(d.Men); })
-       .style("fill","blue")
-       .style("fill-opacity",0.5)
-       .attr("width", 10)
+       .style("fill","#1048C1")
+       .style("fill-opacity",1)
+       .attr("width", timeScaleForLine.bandwidth())
        .attr("height", function(d) { return 400 - numberScaleForLine(d.Men)
        });
      svg4.selectAll(".bar-women")
       .data(data)
       .enter().append("rect")
         .attr("class", ".bar-women")
-        .attr("x", function(d) { return timeScaleForLine(d.Year)+5; })
-        .attr("y", function(d) { return numberScaleForLine(d.Women); })
-        .style("fill","pink")
-        .style("fill-opacity",0.5)
-        .attr("width", 10)
+        .attr("x", function(d) { return timeScaleForLine(d.Year); })
+        .attr("y", function(d) { return numberScaleForLine(d.Women)-400 + numberScaleForLine(d.Men); })
+        .style("fill","#F7004A")
+        .style("fill-opacity",1)
+        .attr("width", timeScaleForLine.bandwidth())
         .attr("height", function(d) { return 400 - numberScaleForLine(d.Women)
         });
-      svg4.selectAll(".bar-text")
-       .data(data)
-       .enter().append("text")
-         .attr("class", "bar-text")
-         .attr("x", function(d) { return timeScaleForLine(d.Year)-20; })
-         .attr("y", function(d) { return numberScaleForLine(d.Number)-30;})
-         .attr("fill",function(d,i){return sectorScale(i)})
-         .text(function(d){return d.Men+"/"+d.Number+"/"+d.Women});
-      svg4.append("text")
-      .attr("x",30)
-      .attr("y",30)
-      .attr("font-size",20)
-      .text("Men/Total/Women")
+      // svg4.selectAll(".bar-text")
+      //  .data(data)
+      //  .enter().append("text")
+      //    .attr("class", "bar-text")
+      //    .attr("x", function(d) { return timeScaleForLine(d.Year); })
+      //    .attr("y", function(d) { return numberScaleForLine(d.Number)-30;})
+      //    .attr("fill",function(d,i){return sectorScale(i)})
+      //    .text(function(d){return d.Men+"/"+d.Number+"/"+d.Women});
+      // svg4.append("text")
+      // .attr("x",30)
+      // .attr("y",30)
+      // .attr("font-size",20)
+      // .text("Men/Total/Women")
 
  }
      }
@@ -335,10 +350,10 @@ ChenLi -->
      function showMap() {
        console.log("showMap");
        hostPoints.forEach(function(d,i){
-         var x=timeScaleForLine(d[4]);
+         var x=timeScaleForLine(d[4])+timeScaleForLine.bandwidth()/2;
          var circlex=projection([d[1],d[0]])[0];
          var circley=projection([d[1],d[0]])[1];
-         var path=[[x,420],[x,460],[circlex,circley]];
+         var path=[[x,420],[x,480],[circlex,circley]];
          var connectionGenerator = d3.line();
          var pathString = connectionGenerator(path);
          svg4.append("path")
@@ -353,11 +368,14 @@ ChenLi -->
            number=-10;
          }
          svg4.append("text")
-         .attr("x",x+3)
-         .attr("y",440+number)
+         // .attr("x",x+3)
+         // .attr("y",440+number)
          .text(d[3])
          .attr("font-size",8)
-         .attr("fill",sectorScale(i));
+         .attr("fill",sectorScale(i))
+         .attr("transform","translate("+(x+3)+",420) rotate(65)");
+         // .attr("transform","rotate("+(x+3)+",440,45)");
+         // console.log("rotate("+(x+3)+",440,45)");
        });
 
         pathGenerator = d3.geoPath().projection(projection);
@@ -369,7 +387,7 @@ ChenLi -->
           return pathGenerator(country);
         })
         .style("stroke","darkblue")
-        .style("fill","lightblue")
+        .style("fill","#BFC4C9")
         .style("opacity","0.5");
         var circles = svg4.selectAll("circle")
         .data(hostPoints);
