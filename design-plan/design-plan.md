@@ -7,9 +7,7 @@ Team: <br>Chen Li  <br>YanJun Chen  <br>ZhengNan Zhao
 
 
 ![](sketch1.jpg)
-![]()
 
 ## 2. Wireframes
 
-![]()
-![]()
+[Wirefram by ZhengNan.](wirefram.pdf)
