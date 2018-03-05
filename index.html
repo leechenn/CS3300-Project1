@@ -374,7 +374,8 @@
                 .attr("width", diameter)
                 .attr("height", 1000)
                 .attr("class", "bubble");
-
+            
+            //  convert data to bubble-chart specific format
             var nodes = d3.hierarchy({ children: dataset })
                 .sum(function (d) { return d.Count; });
 
@@ -395,14 +396,15 @@
                     return d.Name + ": " + d.Count;
                 });
 
-
+              //create circles to represent bubbles
             node.append("circle")
                 .attr("r", function (d) {
                     return d.r;
                 })
                 .style("fill", "#c99d57")
                 .style("opacity", "1");
-
+            
+            // add winter olympics icons the bubbles
             node.append("image")
                 .attr("xlink:href", function (d) { return d.data.Icon; })
                 .attr("width", function (d) {
@@ -415,7 +417,8 @@
                     return "translate(" + - d.r / 2 + "," + - d.r / 1.2 + ")";
                 })
                 .style("opacity", "0.6");
-
+            
+            //format text for the bubbles
             node.append("text")
                 .attr("dy", ".2em")
                 .style("text-anchor", "middle")
