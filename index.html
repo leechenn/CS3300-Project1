@@ -168,6 +168,7 @@
                 Medal: line["Medal"]
             };
         };
+        // load data from world-50m to create world map
         d3.json("/datasets/world-50m.json", function (error, data) {
             console.log("worldmap");
             countries = topojson.feature(data, data.objects.countries);
@@ -176,7 +177,7 @@
             // var interestingPoints = [[0,0], [-76, 42]];
             showMap();
         });
-
+        // load data from newdata.csv to get information of medal
         d3.csv("/datasets/newdata.csv", parseLine, function (error, data) {
             console.log("newdata load");
             rawData = data;
@@ -187,6 +188,7 @@
                 yearArray[i] = d.key;
                 timeArray[i] = parseTime(d.key);
             });
+            // map data to get women and men medal number
             yearData = nestedData.map(function (year) {
                 var men = 0;
                 var women = 0;
@@ -236,21 +238,7 @@
         });
 
         function showLine(data, gender) {
-            console.log("showLine");
-            var pathGenerator = d3.line()
-                .x(function (d) { return timeScaleForLine(d.Year) + timeScaleForLine.bandwidth() / 2; })
-                .y(function (d) {
-                    if (gender == "men") {
-                        return numberScaleForLine(d.Men);
-                    }
-                    if (gender == "women") {
-                        return numberScaleForLine(d.Women);
-                    }
-                    if (gender == "both") {
-                        return numberScaleForLine(d.Number);
-                    }
-                });
-            var pathData = pathGenerator(data);
+          // draw bar chart
             if (gender == "both") {
                 svg4.selectAll(".bar-men")
                     .data(data)
@@ -307,6 +295,7 @@
             circles = circles.enter().append("circle")
                 .merge(circles);
             console.log("showMap");
+            // draw line between circles and bar chart
             hostPoints.forEach(function (d, i) {
                 var x = timeScaleForLine(d[4]) + timeScaleForLine.bandwidth() / 2;
                 var circlex = projection([d[1], d[0]])[0];
@@ -333,8 +322,7 @@
                     .attr("font-family", "'Anton', sans-serif")
                     .attr("fill", "#c99d57")
                     .attr("transform", "translate(" + (x - 7) + ",380) rotate(90)");
-                // .attr("transform","rotate("+(x+3)+",440,45)");
-                // console.log("rotate("+(x+3)+",440,45)");
+
             });
 
 
@@ -351,7 +339,7 @@
             radialGradient.append("stop")
                 .attr("offset", "100%")
                 .attr("stop-color", "#c99d57");
-
+           // add circles which represent cities in world map
             circles
                 .attr("cx", function (d) {
                     return projection([d[1], d[0]])[0];
@@ -373,7 +361,7 @@
 
 
 
-        d3.csv("Bubble_Chart.csv", function (error, dataset) {
+        d3.csv("/datasets/Bubble_Chart.csv", function (error, dataset) {
 
             var diameter = 980;
             var color = d3.scaleOrdinal(d3.schemeCategory20);
