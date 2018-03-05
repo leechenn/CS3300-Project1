@@ -17,13 +17,13 @@
         .bg-1 {
             background: url("images/background.png") no-repeat;
             background-size: auto;
-            width:1800px;
-            margin:auto;
+            width: 1800px;
+            margin: auto;
         }
 
         h1 {
             float: left;
-            padding: 16px 20px 20px 70px;
+            padding: 16px 20px 0px 70px;
             font: bold;
             font-family: 'Anton', sans-serif;
             font-size: 52px;
@@ -33,13 +33,13 @@
 
         img {
             float: left;
-            padding: 0 20px 20px 0;
+            padding: 0 20px 0px 0;
 
         }
 
         h2 {
             float: left;
-            padding: 16px 20px 20px 10px;
+            padding: 16px 20px 0px 10px;
             font: bold;
             font-family: 'Anton', sans-serif;
             font-size: 52px;
@@ -54,11 +54,21 @@
             color: #c99d57;
             margin: auto;
         }
+        h4{
+            float: left;
+            padding: 0px 0px 10px 70px;
+            font-family: 'Oswald';
+            font-size: 12px;
+            color: #808080;
+            margin: auto;
+
+        }
 
         svg {
             padding: 30px 50px;
         }
-        #svg2{
+
+        #svg2 {
             position: absolute;
         }
 
@@ -75,9 +85,16 @@
 <body>
     <div class="bg-1">
         <g>
-        <h1>Road to No.</h1>
-        <img src="images/100medal.png" width="200">
-        <h2>U.S. Winter Olympic gold medals</h2>
+            <h1>Road to No.</h1>
+            <img src="images/100medal.png" width="200">
+            <h2>U.S. Winter Olympic gold medals</h2>
+
+            <h4>
+                In honor of Team USA’s 100th Winter Olympics gold medal, this project serves as a historical review of American
+                athletes’ road to this milestone. The number sum up can exceed 100 since there are multiple winners for the same gold
+                medal.
+            </h4>
+
         </g>
         <br>
         <br>
@@ -103,6 +120,7 @@
                         font-size: 10px;
                         fill: #696969;">The data is by the data when Shawn White won U.S.'s 100th gold medals.</text>
                 </g>
+
             </svg>
 
             <svg id="svg2" font-family="'Anton', sans-serif" font-size="10" text-anchor="middle">
@@ -319,7 +337,7 @@
                 // console.log("rotate("+(x+3)+",440,45)");
             });
 
-            
+
 
             var radialGradient = svg4.append("defs")
                 .append("radialGradient")
@@ -328,7 +346,7 @@
             radialGradient.append("stop")
                 .attr("offset", "0%")
                 .attr("stop-color", "#fff")
-                .attr("opacity" , "0.1");
+                .attr("opacity", "0.1");
 
             radialGradient.append("stop")
                 .attr("offset", "100%")
@@ -346,8 +364,10 @@
                 })
                 .attr("fill", "url(#radial-gradient)")
                 .attr("opacity", "0.6");
-
         }
+
+
+
 
 
 
@@ -355,7 +375,7 @@
 
         d3.csv("Bubble_Chart.csv", function (error, dataset) {
 
-            var diameter = 920;
+            var diameter = 980;
             var color = d3.scaleOrdinal(d3.schemeCategory20);
 
             var bubble = d3.pack(dataset)
@@ -379,7 +399,7 @@
                 .append("g")
                 .attr("class", "node")
                 .attr("transform", function (d) {
-                    return "translate(" + (d.x-20) + "," + (d.y - 20) + ")";
+                    return "translate(" + (d.x - 100) + "," + (d.y - 10) + ")";
                 });
 
             node.append("title")
@@ -416,9 +436,10 @@
                 })
                 .attr("font-family", "'Oswald', sans-serif")
                 .attr("font-size", function (d) {
-                    return Math.max(d.r / 5, 8);
+                    return Math.max(d.r / 5, 11);
                 })
-                .attr("fill", "white");
+                .attr("fill", "white")
+                .attr("shadow","#c99d57");
 
             node.append("text")
                 .attr("dy", "1.3em")
@@ -428,7 +449,7 @@
                 })
                 .attr("font-family", "'Anton', sans-serif")
                 .attr("font-size", function (d) {
-                    return Math.max(d.r / 2, 10);
+                    return Math.max(d.r / 2, 14);
                 })
                 .attr("fill", "white");
 
