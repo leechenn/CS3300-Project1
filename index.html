@@ -363,7 +363,7 @@
 
         d3.csv("/datasets/Bubble_Chart.csv", function (error, dataset) {
 
-            var diameter = 980;
+            var diameter = 980; //set maximum size for the bubble
             var color = d3.scaleOrdinal(d3.schemeCategory20);
 
             var bubble = d3.pack(dataset)
