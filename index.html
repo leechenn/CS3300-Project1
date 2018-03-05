@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link href="https://fonts.googleapis.com/css?family=Anton|Oswald" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
     <script src="http://d3js.org/topojson.v2.min.js"></script>
@@ -78,12 +78,13 @@
         <br>
         <br>
         <g>
-            
+
             <svg id="svg1" height="1000" width="1000">
-                <g transform="translate(10,0)">
-                        <text style="font-family: 'Anton';
+                <g transform="translate(25,0)">
+                    <text style="font-family: 'Anton';
                         font-size: 18px;
-                        fill: #c99d57;">How many gold medals do U.S.team win in each Winter Olympic games?</text></g>
+                        fill: #c99d57;">How many gold medals do U.S.team win in each Winter Olympic games?</text>
+                </g>
                 <g class="legend" transform="translate(850,40)">
                     <rect width="25" height="10" style="fill: #1048C1;"></rect>
                     <text x="28" y="10">Men</text>
@@ -92,13 +93,24 @@
                     <rect width="25" height="10" style="fill: #F7004A; "></rect>
                     <text x="28" y="10">Women</text>
                 </g>
+                <g transform="translate(25,12)">
+                    <text style="font-family: 'Oswald';
+                        font-size: 10px;
+                        fill: #696969;">The data is by the data when Shawn White won U.S.'s 100th gold medals.</text>
+                </g>
             </svg>
-            
+
             <svg id="svg2" font-family="'Anton', sans-serif" font-size="10" text-anchor="middle">
-                    <g transform="translate(300,0)">
-                            <text  style="font-family: 'Anton';
+                <g transform="translate(278,0)">
+                    <text style="font-family: 'Anton';
                             font-size: 18px;
-                            fill: #c99d57;">How many gold medals do U.S.team win in each category?</text></g>
+                            fill: #c99d57;">How many gold medals do U.S.team win in each category?</text>
+                </g>
+                <g transform="translate(200,12)">
+                    <text style="font-family: 'Oswald';
+                        font-size: 10px;
+                        fill: #696969;">The data is by the data when Shawn White won U.S.'s 100th gold medals.</text>
+                </g>
             </svg>
         </g>
     </div>
@@ -241,10 +253,36 @@
                     .attr("height", function (d) {
                         return 350 - numberScaleForLine(d.Women)
                     });
+                svg4.selectAll(".bar-text")
+                    .data(data)
+                    .enter().append("text")
+                    .style("text-anchor", "middle")
+                    .attr("x", function (d) { return timeScaleForLine(d.Year) + 15; })
+                    .attr("y", function (d) { return numberScaleForLine(d.Number) - 3; })
+                    .text(function (d) { return d.Number })
+                    .attr("font-family", "'Anton', sans-serif")
+                    .attr("fill", "#c99d57")
+                    .attr("font-size", 20);
             }
         }
 
         function showMap() {
+            pathGenerator = d3.geoPath().projection(projection);
+            var paths = svg4.selectAll("path.country")
+                .data(countries.features);
+            paths = paths.enter().append("path")
+                .attr("class", "country").merge(paths);
+            paths.attr("d", function (country) {
+                return pathGenerator(country);
+            })
+                .style("stroke", "white")
+                .style("fill", "lightgrey")
+                .style("opacity", "0.6");
+            var circles = svg4.selectAll("circle")
+                .data(hostPoints);
+            // circles.exit().remove();
+            circles = circles.enter().append("circle")
+                .merge(circles);
             console.log("showMap");
             hostPoints.forEach(function (d, i) {
                 var x = timeScaleForLine(d[4]) + timeScaleForLine.bandwidth() / 2;
@@ -276,22 +314,21 @@
                 // console.log("rotate("+(x+3)+",440,45)");
             });
 
-            pathGenerator = d3.geoPath().projection(projection);
-            var paths = svg4.selectAll("path.country")
-                .data(countries.features);
-            paths = paths.enter().append("path")
-                .attr("class", "country").merge(paths);
-            paths.attr("d", function (country) {
-                return pathGenerator(country);
-            })
-                .style("stroke", "lightgrey")
-                .style("fill", "white")
-                .style("opacity", "0.6");
-            var circles = svg4.selectAll("circle")
-                .data(hostPoints);
-            // circles.exit().remove();
-            circles = circles.enter().append("circle")
-                .merge(circles);
+            
+
+            var radialGradient = svg4.append("defs")
+                .append("radialGradient")
+                .attr("id", "radial-gradient");
+
+            radialGradient.append("stop")
+                .attr("offset", "0%")
+                .attr("stop-color", "#fff")
+                .attr("opacity" , "0.1");
+
+            radialGradient.append("stop")
+                .attr("offset", "100%")
+                .attr("stop-color", "#c99d57");
+
             circles
                 .attr("cx", function (d) {
                     return projection([d[1], d[0]])[0];
@@ -300,10 +337,10 @@
                     return projection([d[1], d[0]])[1];
                 })
                 .attr("r", function (d) {
-                    return 5;
+                    return 10;
                 })
-                .attr("fill", "#c99d57")
-                .attr("opacity", "0.5");
+                .attr("fill", "url(#radial-gradient)")
+                .attr("opacity", "0.6");
 
         }
 
@@ -363,7 +400,8 @@
                 })
                 .attr("transform", function (d) {
                     return "translate(" + - d.r / 2 + "," + - d.r / 1.2 + ")";
-                });
+                })
+                .style("opacity", "0.6");
 
             node.append("text")
                 .attr("dy", ".2em")
@@ -371,11 +409,11 @@
                 .text(function (d) {
                     return d.data.Sport.substring(0, d.r);
                 })
-                .attr("font-family", "'Anton', sans-serif")
+                .attr("font-family", "'Oswald', sans-serif")
                 .attr("font-size", function (d) {
                     return Math.max(d.r / 5, 8);
                 })
-                .attr("fill", "black");
+                .attr("fill", "white");
 
             node.append("text")
                 .attr("dy", "1.3em")
@@ -388,7 +426,7 @@
                     return Math.max(d.r / 2, 10);
                 })
                 .attr("fill", "white");
-                
+
             d3.select(self.frameElement)
                 .style("height", diameter + "px");
 
