@@ -1,1 +1,11 @@
-sports,numAlpine Skiing,16Bobsleigh ,24Figure skating ,16Freestyle Skiing ,8Ice Hockey ,56Nordic Combined,1Short Track Spd Skating,4Skeleton ,3Snowboard,14Speed skating,29
+Sport,Count,Icon,
+Alpine Skiing,16,Logo/Alpine Skiing.png,
+Bobsleigh ,24,Logo/Bobsleigh.png,
+Figure Skating ,16,Logo/Figure Skating.png,
+Freestyle Skiing ,8, Logo/Freestyle Skiing.png,
+Ice Hockey ,56, Logo/Ice Hockey.png,
+Nordic Combined, 1, Logo/Nordic Combined.png,
+Short Track Spd Skating, 4, Logo/Short Track Speed Skating.png,
+Skeleton,3,Logo/Skeleton.png,
+Snowboard,14,Logo/Snowboard.png,
+Speed Skating,29, Logo/Speed Skating.png

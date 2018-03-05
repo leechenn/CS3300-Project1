@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Olympic Winter Games</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Anton|Oswald" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+    <script src="http://d3js.org/topojson.v2.min.js"></script>
+
+    <style>
+        .bg-1 {
+            background: url("images/background.png") no-repeat;
+            background-size: auto;
+        }
+
+        h1 {
+            float: left;
+            padding: 16px 20px 20px 70px;
+            font: bold;
+            font-family: 'Anton', sans-serif;
+            font-size: 52px;
+            color: #c99d57;
+            text-shadow: 2px 2px #ecc14b;
+        }
+
+        img {
+            float: left;
+            padding: 0 20px 20px 0;
+
+        }
+
+        h2 {
+            float: left;
+            padding: 16px 20px 20px 10px;
+            font: bold;
+            font-family: 'Anton', sans-serif;
+            font-size: 52px;
+            color: #c99d57;
+            text-shadow: 2px 2px #ecc14b;
+        }
+
+        h3 {
+            padding: 10px 0px 0px 70px;
+            font-family: 'Anton';
+            font-size: 18px;
+            color: #c99d57;
+            margin: auto;
+        }
+
+        svg {
+            padding: 30px 50px;
+        }
+
+
+        .axisy text {
+            font-family: 'Anton', sans-serif;
+            font: Regular;
+            font-size: 12px;
+            fill: #c99d57;
+            stroke-width: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-1">
+        <h1>Road to No.</h1>
+        <img src="images/100medal.png" width="200">
+        <h2>U.S. Winter Olympic gold medals</h2>
+        <br>
+        <br>
+        <br>
+        <br>
+        <g>
+            
+            <svg id="svg1" height="1000" width="1000">
+                <g transform="translate(10,0)">
+                        <text style="font-family: 'Anton';
+                        font-size: 18px;
+                        fill: #c99d57;">How many gold medals do U.S.team win in each Winter Olympic games?</text></g>
+                <g class="legend" transform="translate(850,40)">
+                    <rect width="25" height="10" style="fill: #1048C1;"></rect>
+                    <text x="28" y="10">Men</text>
+                </g>
+                <g class="legend" transform="translate(850,20)">
+                    <rect width="25" height="10" style="fill: #F7004A; "></rect>
+                    <text x="28" y="10">Women</text>
+                </g>
+            </svg>
+            
+            <svg id="svg2" font-family="'Anton', sans-serif" font-size="10" text-anchor="middle">
+                    <g transform="translate(300,0)">
+                            <text  style="font-family: 'Anton';
+                            font-size: 18px;
+                            fill: #c99d57;">How many gold medals do U.S.team win in each category?</text></g>
+            </svg>
+        </g>
+    </div>
+
+    <script>
+        var rawData, nestedData;
+        var yearData;
+        var countries;
+        var timeScale, numberScale, genderScale, timeScaleForLine, numberScaleForLine;
+        var hostPoints = [];
+        var timeArray = [];
+        var svg4 = d3.select("#svg1");
+        var projection = d3.geoEquirectangular().center([0, 0]);
+        var pathGenerator = d3.geoPath().projection(projection);
+        var sectorScale = d3.scaleOrdinal(d3.schemeCategoryc20);
+        var yearArray = [];
+        parseTime = d3.timeParse("%Y");
+        function parseLine(line) {
+            return {
+                Year: line["Year"],
+                Gender: line["Gender"],
+                Sport: line["Sport"],
+                City: line["City"],
+                Location: JSON.parse(line["Location"])
+            };
+        };
+        function parseLine2(line) {
+            return {
+                Year: line["Year"],
+                Gender: line["Gender"],
+                Sport: line["Sport"],
+                Medal: line["Medal"]
+            };
+        };
+        d3.json("/datasets/world-50m.json", function (error, data) {
+            console.log("worldmap");
+            countries = topojson.feature(data, data.objects.countries);
+            projection.fitExtent([[0, svg4.attr("height") / 2], [svg4.attr("width"), svg4.attr("height") - 10]], countries);
+
+            // var interestingPoints = [[0,0], [-76, 42]];
+            showMap();
+        });
+
+        d3.csv("/datasets/newdata.csv", parseLine, function (error, data) {
+            console.log("newdata load");
+            rawData = data;
+            nestedData = d3.nest()
+                .key(function (d) { return d.Year })
+                .entries(data);
+            nestedData.forEach(function (d, i) {
+                yearArray[i] = d.key;
+                timeArray[i] = parseTime(d.key);
+            });
+            yearData = nestedData.map(function (year) {
+                var men = 0;
+                var women = 0;
+                var result = { Year: year.key };
+                result.Number = year.values.length;
+                year.values.forEach(function (d) {
+                    if (d.Gender == "Men") {
+                        men++;
+                    }
+                    else {
+                        women++;
+                    }
+                });
+                result.Men = men;
+                result.Women = women;
+                result.City = year.values[0]["City"];
+                result.Location = year.values[0]["Location"];
+                return result;
+            });
+            yearData.sort(function (objA, objB) {
+                return Number(objA["Year"]) - Number(objB["Year"]);
+            });
+            yearArray.sort(function (objA, objB) {
+                return Number(objA) - Number(objB);
+            });
+
+            yearData.forEach(function (d) {
+                var array = [d["Location"][0], d["Location"][1], d["Number"], d["City"], d["Year"]];
+                hostPoints.push(array);
+            });
+            var numberExtent = d3.extent(yearData, function (d) { return d.Number });
+            numberScaleForLine = d3.scaleLinear().domain([0, numberExtent[1]]).range([350, 20]);
+            timeScaleForLine = d3.scaleBand().domain(yearArray).range([80, 920]).paddingInner(0.1);
+            var timeAxisForLine = d3.axisBottom(timeScaleForLine);
+            var numberAxisForLine = d3.axisLeft(numberScaleForLine);
+            numberAxisForLine.tickSize(10);
+            svg4.append("g")
+                .attr("class", "axisy")
+                .call(numberAxisForLine)
+                .attr("transform", "translate(50,0)");
+            svg4.append("g")
+                .call(timeAxisForLine)
+                .attr("class", "axisy")
+                .attr("transform", "translate(0,350)");
+            showLine(yearData, "both");
+
+        });
+
+        function showLine(data, gender) {
+            console.log("showLine");
+            var pathGenerator = d3.line()
+                .x(function (d) { return timeScaleForLine(d.Year) + timeScaleForLine.bandwidth() / 2; })
+                .y(function (d) {
+                    if (gender == "men") {
+                        return numberScaleForLine(d.Men);
+                    }
+                    if (gender == "women") {
+                        return numberScaleForLine(d.Women);
+                    }
+                    if (gender == "both") {
+                        return numberScaleForLine(d.Number);
+                    }
+                });
+            var pathData = pathGenerator(data);
+            if (gender == "both") {
+                svg4.selectAll(".bar-men")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", "bar-men")
+                    .attr("x", function (d) { return timeScaleForLine(d.Year); })
+                    .attr("y", function (d) { return numberScaleForLine(d.Men); })
+                    .style("fill", "#1048C1")
+                    .style("fill-opacity", 1)
+                    .attr("width", timeScaleForLine.bandwidth())
+                    .attr("height", function (d) {
+                        return 350 - numberScaleForLine(d.Men)
+                    });
+                svg4.selectAll(".bar-women")
+                    .data(data)
+                    .enter().append("rect")
+                    .attr("class", ".bar-women")
+                    .attr("x", function (d) { return timeScaleForLine(d.Year); })
+                    .attr("y", function (d) { return numberScaleForLine(d.Women) - 350 + numberScaleForLine(d.Men); })
+                    .style("fill", "#F7004A")
+                    .style("fill-opacity", 1)
+                    .attr("width", timeScaleForLine.bandwidth())
+                    .attr("height", function (d) {
+                        return 350 - numberScaleForLine(d.Women)
+                    });
+            }
+        }
+
+        function showMap() {
+            console.log("showMap");
+            hostPoints.forEach(function (d, i) {
+                var x = timeScaleForLine(d[4]) + timeScaleForLine.bandwidth() / 2;
+                var circlex = projection([d[1], d[0]])[0];
+                var circley = projection([d[1], d[0]])[1];
+                var path = [[x - 10, 380], [x - 10, 480], [circlex, circley]];
+                var connectionGenerator = d3.line();
+                var pathString = connectionGenerator(path);
+                svg4.append("path")
+                    .attr("d", pathString)
+                    .attr("fill", "none")
+                    .attr("stroke", "#c99d57");
+                var number;
+                if (i % 2 == 0) {
+                    number = 10;
+                }
+                else {
+                    number = -10;
+                }
+                svg4.append("text")
+                    // .attr("x",x+3)
+                    // .attr("y",440+number)
+                    .text(d[3])
+                    .attr("font-size", 20)
+                    .attr("font-family", "'Anton', sans-serif")
+                    .attr("fill", "#c99d57")
+                    .attr("transform", "translate(" + (x - 7) + ",380) rotate(90)");
+                // .attr("transform","rotate("+(x+3)+",440,45)");
+                // console.log("rotate("+(x+3)+",440,45)");
+            });
+
+            pathGenerator = d3.geoPath().projection(projection);
+            var paths = svg4.selectAll("path.country")
+                .data(countries.features);
+            paths = paths.enter().append("path")
+                .attr("class", "country").merge(paths);
+            paths.attr("d", function (country) {
+                return pathGenerator(country);
+            })
+                .style("stroke", "lightgrey")
+                .style("fill", "white")
+                .style("opacity", "0.6");
+            var circles = svg4.selectAll("circle")
+                .data(hostPoints);
+            // circles.exit().remove();
+            circles = circles.enter().append("circle")
+                .merge(circles);
+            circles
+                .attr("cx", function (d) {
+                    return projection([d[1], d[0]])[0];
+                })
+                .attr("cy", function (d) {
+                    return projection([d[1], d[0]])[1];
+                })
+                .attr("r", function (d) {
+                    return 5;
+                })
+                .attr("fill", "#c99d57")
+                .attr("opacity", "0.5");
+
+        }
+
+
+
+
+
+        d3.csv("Bubble_Chart.csv", function (error, dataset) {
+
+            var diameter = 850;
+            var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+            var bubble = d3.pack(dataset)
+                .size([diameter, 1000])
+                .padding(1.5);
+
+            var svg = d3.select("#svg2")
+                .attr("width", diameter)
+                .attr("height", 1000)
+                .attr("class", "bubble");
+
+            var nodes = d3.hierarchy({ children: dataset })
+                .sum(function (d) { return d.Count; });
+
+            var node = svg.selectAll(".node")
+                .data(bubble(nodes).descendants())
+                .enter()
+                .filter(function (d) {
+                    return !d.children
+                })
+                .append("g")
+                .attr("class", "node")
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + "," + (d.y - 20) + ")";
+                });
+
+            node.append("title")
+                .text(function (d) {
+                    return d.Name + ": " + d.Count;
+                });
+
+
+            node.append("circle")
+                .attr("r", function (d) {
+                    return d.r;
+                })
+                .style("fill", "#c99d57")
+                .style("opacity", "1");
+
+            node.append("image")
+                .attr("xlink:href", function (d) { return d.data.Icon; })
+                .attr("width", function (d) {
+                    return d.r;
+                })
+                .attr("height", function (d) {
+                    return d.r;
+                })
+                .attr("transform", function (d) {
+                    return "translate(" + - d.r / 2 + "," + - d.r / 1.2 + ")";
+                });
+
+            node.append("text")
+                .attr("dy", ".2em")
+                .style("text-anchor", "middle")
+                .text(function (d) {
+                    return d.data.Sport.substring(0, d.r);
+                })
+                .attr("font-family", "'Anton', sans-serif")
+                .attr("font-size", function (d) {
+                    return Math.max(d.r / 5, 8);
+                })
+                .attr("fill", "black");
+
+            node.append("text")
+                .attr("dy", "1.3em")
+                .style("text-anchor", "middle")
+                .text(function (d) {
+                    return d.data.Count;
+                })
+                .attr("font-family", "'Anton', sans-serif")
+                .attr("font-size", function (d) {
+                    return Math.max(d.r / 2, 10);
+                })
+                .attr("fill", "white");
+                
+            d3.select(self.frameElement)
+                .style("height", diameter + "px");
+
+        })
+
+    </script>
+</body>
+
+
+</html>
