@@ -17,6 +17,8 @@
         .bg-1 {
             background: url("images/background.png") no-repeat;
             background-size: auto;
+            width:1800px;
+            margin:auto;
         }
 
         h1 {
@@ -26,7 +28,7 @@
             font-family: 'Anton', sans-serif;
             font-size: 52px;
             color: #c99d57;
-            text-shadow: 2px 2px #ecc14b;
+            text-shadow: 2px 2px 3px #111111;
         }
 
         img {
@@ -42,7 +44,7 @@
             font-family: 'Anton', sans-serif;
             font-size: 52px;
             color: #c99d57;
-            text-shadow: 2px 2px #ecc14b;
+            text-shadow: 2px 2px 3px #111111;
         }
 
         h3 {
@@ -56,7 +58,9 @@
         svg {
             padding: 30px 50px;
         }
-
+        #svg2{
+            position: absolute;
+        }
 
         .axisy text {
             font-family: 'Anton', sans-serif;
@@ -70,15 +74,16 @@
 
 <body>
     <div class="bg-1">
+        <g>
         <h1>Road to No.</h1>
         <img src="images/100medal.png" width="200">
         <h2>U.S. Winter Olympic gold medals</h2>
+        </g>
         <br>
         <br>
         <br>
         <br>
         <g>
-
             <svg id="svg1" height="1000" width="1000">
                 <g transform="translate(25,0)">
                     <text style="font-family: 'Anton';
@@ -195,7 +200,7 @@
                 hostPoints.push(array);
             });
             var numberExtent = d3.extent(yearData, function (d) { return d.Number });
-            numberScaleForLine = d3.scaleLinear().domain([0, numberExtent[1]]).range([350, 20]);
+            numberScaleForLine = d3.scaleLinear().domain([0, numberExtent[1]]).range([350, 40]);
             timeScaleForLine = d3.scaleBand().domain(yearArray).range([80, 920]).paddingInner(0.1);
             var timeAxisForLine = d3.axisBottom(timeScaleForLine);
             var numberAxisForLine = d3.axisLeft(numberScaleForLine);
@@ -350,7 +355,7 @@
 
         d3.csv("Bubble_Chart.csv", function (error, dataset) {
 
-            var diameter = 850;
+            var diameter = 920;
             var color = d3.scaleOrdinal(d3.schemeCategory20);
 
             var bubble = d3.pack(dataset)
@@ -374,7 +379,7 @@
                 .append("g")
                 .attr("class", "node")
                 .attr("transform", function (d) {
-                    return "translate(" + d.x + "," + (d.y - 20) + ")";
+                    return "translate(" + (d.x-20) + "," + (d.y - 20) + ")";
                 });
 
             node.append("title")
