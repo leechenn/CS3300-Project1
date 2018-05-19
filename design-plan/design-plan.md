@@ -10,4 +10,4 @@ Team: <br>Chen Li  <br>YanJun Chen  <br>ZhengNan Zhao
 
 ## 2. Wireframes
 
-[Wirefram by ZhengNan.](wirefram.pdf)
+[Wirefram by ZhengNan Zhao.](wirefram.pdf)
