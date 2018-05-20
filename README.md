@@ -1,6 +1,7 @@
 # CS3300-project1
-creating a non-interactive data visualization
+In honor of Team USA’ 100th Winter Olympics gold medal, this project shows a historical review of American athletes’ road to this milestone by a non-interactive data visualization
 
+Team:<br/>
 Chen Li<br/>
 Yanjun Chen<br/>
 Zhengnan Zhao<br/>
